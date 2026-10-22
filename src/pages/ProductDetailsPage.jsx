@@ -24,7 +24,6 @@ import {
   Ruler,
   ThermometerSun,
   Calendar,
-  Package,
   Send,
   User,
   MessageSquare
@@ -101,7 +100,8 @@ export const ProductDetailsPage = () => {
 
   useEffect(() => {
     if (product) {
-      setSelectedSize(product.packageSizes?.[0] || { size: 'Standard Pack', price: product.price });
+      const sizes = product.packageSizes || product.packSizes || [];
+      setSelectedSize(sizes[0] || { size: 'Standard Pack', price: product.price });
       setQuantity(1);
       setActiveGalleryIdx(0);
       setActiveTab('description');
@@ -110,6 +110,21 @@ export const ProductDetailsPage = () => {
       window.scrollTo(0, 0);
     }
   }, [product, id]);
+
+  /* Gallery images: use product.images array if available, otherwise derive from image URL */
+  const galleryImages = useMemo(() => {
+    if (!product) return [];
+    // New products have an images array with {url, alt}
+    if (product.images && product.images.length > 0) {
+      return product.images.map((img) => ({ label: img.alt || product.name, src: img.url }));
+    }
+    // Fallback: build variants from the base image URL
+    const base = product.image || '';
+    return GALLERY_VARIANTS.map((v, i) => ({
+      label: v.label,
+      src: i === 0 ? base : `${base}${v.suffix}`
+    }));
+  }, [product]);
 
   if (!product) {
     return (
@@ -169,15 +184,6 @@ export const ProductDetailsPage = () => {
   const relatedProducts = initialProducts
     .filter((p) => p.category === product.category && p.id !== product.id)
     .slice(0, 4);
-
-  /* Gallery images derived from main product image */
-  const galleryImages = useMemo(() => {
-    const base = product.image;
-    return GALLERY_VARIANTS.map((v, i) => ({
-      label: v.label,
-      src: i === 0 ? base : `${base}${v.suffix}`
-    }));
-  }, [product.image]);
 
   const TABS = [
     { key: 'description', label: 'Description' },
@@ -315,12 +321,12 @@ export const ProductDetailsPage = () => {
               {product.description}
             </p>
 
-            {/* Package Size Picker */}
-            {product.packageSizes && (
+            {/* Package Size Picker — supports both packageSizes and packSizes */}
+            {(product.packageSizes || product.packSizes) && (
               <div className="size-selector-wrap">
                 <label className="input-label">Select Package Size / Weight:</label>
                 <div className="size-options-grid">
-                  {product.packageSizes.map((pack) => (
+                  {(product.packageSizes || product.packSizes).map((pack) => (
                     <button
                       key={pack.size}
                       type="button"
@@ -462,7 +468,7 @@ export const ProductDetailsPage = () => {
                   </div>
                   <div className="pdp-feature-item">
                     <CheckCircle2 size={18} color="var(--color-primary)" />
-                    <span>Available in {product.packageSizes?.length || 1} convenient pack sizes</span>
+                    <span>Available in {(product.packageSizes || product.packSizes)?.length || 1} convenient pack sizes</span>
                   </div>
                 </div>
               </div>
@@ -482,10 +488,10 @@ export const ProductDetailsPage = () => {
                     <tr><td>Sowing Season</td><td>{product.season}</td></tr>
                     <tr><td>Harvest Duration</td><td>{product.harvestTime}</td></tr>
                     <tr><td>Sowing Method</td><td>{product.sowingMethod}</td></tr>
-                    {product.packageSizes && (
+                    {(product.packageSizes || product.packSizes) && (
                       <tr>
                         <td>Available Sizes</td>
-                        <td>{product.packageSizes.map((p) => p.size).join(', ')}</td>
+                        <td>{(product.packageSizes || product.packSizes).map((p) => p.size).join(', ')}</td>
                       </tr>
                     )}
                     <tr><td>Stock Availability</td><td>{isOutOfStock ? 'Out of Stock' : `${product.stock} packets available`}</td></tr>
@@ -574,6 +580,51 @@ export const ProductDetailsPage = () => {
                       <strong>Harvest Timeline</strong>
                       <p>{product.harvestTime}</p>
                     </div>
+                  </div>
+                ) : product.growingDetails ? (
+                  <div className="pdp-tips-grid">
+                    {product.growingDetails.soilType && (
+                      <div className="pdp-tip-card">
+                        <Leaf size={22} color="var(--color-primary)" />
+                        <strong>Optimal Soil</strong>
+                        <p>{product.growingDetails.soilType}</p>
+                      </div>
+                    )}
+                    {product.growingDetails.sunlight && (
+                      <div className="pdp-tip-card">
+                        <Sun size={22} color="var(--color-primary)" />
+                        <strong>Sunlight</strong>
+                        <p>{product.growingDetails.sunlight}</p>
+                      </div>
+                    )}
+                    {product.growingDetails.watering && (
+                      <div className="pdp-tip-card">
+                        <Droplets size={22} color="var(--color-primary)" />
+                        <strong>Watering</strong>
+                        <p>{product.growingDetails.watering}</p>
+                      </div>
+                    )}
+                    {(product.growingDetails.harvestDays || product.harvestTime) && (
+                      <div className="pdp-tip-card">
+                        <Calendar size={22} color="var(--color-primary)" />
+                        <strong>Harvest Timeline</strong>
+                        <p>{product.growingDetails.harvestDays || product.harvestTime}</p>
+                      </div>
+                    )}
+                    {product.growingDetails.plantSpacing && (
+                      <div className="pdp-tip-card">
+                        <Ruler size={22} color="var(--color-primary)" />
+                        <strong>Plant Spacing</strong>
+                        <p>{product.growingDetails.plantSpacing}</p>
+                      </div>
+                    )}
+                    {product.growingDetails.germinationDays && (
+                      <div className="pdp-tip-card">
+                        <ThermometerSun size={22} color="var(--color-primary)" />
+                        <strong>Germination</strong>
+                        <p>{product.growingDetails.germinationDays}</p>
+                      </div>
+                    )}
                   </div>
                 ) : (
                   <p style={{ color: 'var(--text-secondary)' }}>Detailed cultivation tips for this variety will be available soon. Please refer to the Sowing Guide tab for general instructions.</p>

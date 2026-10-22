@@ -41,7 +41,8 @@ export const CartProvider = ({ children }) => {
       return false;
     }
 
-    const size = selectedSizeObj?.size || product.packageSizes?.[0]?.size || 'Standard Pack';
+    const sizes = product.packageSizes || product.packSizes || [];
+    const size = selectedSizeObj?.size || sizes[0]?.size || 'Standard Pack';
     const price = selectedSizeObj?.price || product.price;
 
     setCartItems((prevItems) => {
@@ -81,7 +82,7 @@ export const CartProvider = ({ children }) => {
           slug: product.slug,
           name: product.name,
           shortName: product.shortName || product.name,
-          image: product.image,
+          image: product.image || product.images?.[0]?.url || '',
           categoryName: product.categoryName,
           category: product.category,
           brand: product.brand,

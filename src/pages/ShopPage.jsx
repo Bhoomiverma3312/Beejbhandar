@@ -142,7 +142,12 @@ export const ShopPage = () => {
 
   // Multi-facet filtering logic
   const filteredProducts = useMemo(() => {
+    const collection = searchParams.get('collection');
     return initialProducts.filter((product) => {
+      // 0. Collection Filter (featured / bestseller quick-pills)
+      if (collection === 'featured' && !product.isFeatured) return false;
+      if (collection === 'bestseller' && !(product.isBestseller || product.isBestSeller)) return false;
+
       // 1. Category Filter
       if (selectedCategory !== 'all' && product.category !== selectedCategory) {
         return false;
@@ -150,7 +155,7 @@ export const ShopPage = () => {
 
       // 2. Season Filter
       if (selectedSeason !== 'all') {
-        const seasonMatch = product.season.toLowerCase().includes(selectedSeason.toLowerCase());
+        const seasonMatch = (product.season || '').toLowerCase().includes(selectedSeason.toLowerCase());
         if (!seasonMatch) return false;
       }
 
@@ -164,7 +169,7 @@ export const ShopPage = () => {
         return false;
       }
 
-      // 5. Search Query Filter (Matches Name, Variety, Hindi name, Crop/Category, Description)
+      // 5. Search Query Filter (Matches Name, Variety, Hindi name, Crop/Category, Description, Tags)
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase().trim();
         const matchName = product.name.toLowerCase().includes(q);
@@ -174,15 +179,16 @@ export const ShopPage = () => {
         const matchCrop = product.categoryName?.toLowerCase().includes(q);
         const matchDesc = product.description?.toLowerCase().includes(q);
         const matchBrand = product.brand?.toLowerCase().includes(q);
+        const matchTags = product.tags?.some(t => t.toLowerCase().includes(q));
 
-        if (!matchName && !matchShort && !matchVariety && !matchHindi && !matchCrop && !matchDesc && !matchBrand) {
+        if (!matchName && !matchShort && !matchVariety && !matchHindi && !matchCrop && !matchDesc && !matchBrand && !matchTags) {
           return false;
         }
       }
 
       return true;
     });
-  }, [selectedCategory, selectedSeason, inStockOnly, minPrice, maxPrice, searchQuery]);
+  }, [selectedCategory, selectedSeason, inStockOnly, minPrice, maxPrice, searchQuery, searchParams]);
 
   // Sorting logic
   const sortedProducts = useMemo(() => {
@@ -244,12 +250,46 @@ export const ShopPage = () => {
         </div>
 
         {/* Global Search Bar */}
-        <div style={{ marginBottom: 'var(--space-xl)', maxWidth: '640px' }}>
+        <div style={{ marginBottom: 'var(--space-md)', maxWidth: '640px' }}>
           <SearchBar
             value={searchQuery}
             onChange={handleSearchChange}
             placeholder="Search by variety name, crop, Hindi keyword (e.g. Tomato, Sarson, Wheat, Berseem)..."
           />
+        </div>
+
+        {/* Featured & Bestseller Quick Highlights */}
+        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: 'var(--space-lg)' }}>
+          <button
+            type="button"
+            className={`btn btn-sm ${!searchParams.get('collection') ? 'btn-primary' : 'btn-ghost'}`}
+            onClick={() => {
+              updateUrlParams({ collection: null });
+              setCurrentPage(1);
+            }}
+          >
+            All Seeds ({initialProducts.length})
+          </button>
+          <button
+            type="button"
+            className={`btn btn-sm ${searchParams.get('collection') === 'featured' ? 'btn-primary' : 'btn-outline'}`}
+            onClick={() => {
+              updateUrlParams({ collection: 'featured' });
+              setCurrentPage(1);
+            }}
+          >
+            ★ Featured Varieties ({initialProducts.filter(p => p.isFeatured).length})
+          </button>
+          <button
+            type="button"
+            className={`btn btn-sm ${searchParams.get('collection') === 'bestseller' ? 'btn-primary' : 'btn-outline'}`}
+            onClick={() => {
+              updateUrlParams({ collection: 'bestseller' });
+              setCurrentPage(1);
+            }}
+          >
+            🔥 Best-Selling Seeds ({initialProducts.filter(p => p.isBestseller || p.isBestSeller).length})
+          </button>
         </div>
 
         {/* Active Filter Chips Bar */}

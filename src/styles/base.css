@@ -130,8 +130,34 @@ ul, ol {
 
 /* Focus States for Accessibility */
 :focus-visible {
-  outline: 2px solid var(--color-primary);
+  outline: 2.5px solid var(--color-primary);
   outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(36, 86, 60, 0.15);
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2.5px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Accessible Minimum Touch Targets on interactive elements */
+button,
+a,
+input[type="button"],
+input[type="submit"],
+.action-btn {
+  min-height: 38px;
+}
+
+/* Table accessibility & scroll container */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* Custom Scrollbar */
@@ -158,3 +184,16 @@ ul, ol {
   background-color: var(--bg-sage);
   color: var(--color-primary-dark);
 }
+
+/* Prefers Reduced Motion Accessibility Override */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+

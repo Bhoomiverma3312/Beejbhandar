@@ -1,6 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Sprout, ShieldCheck, Truck, Headphones, Heart } from 'lucide-react';
+import { Sprout, ShieldCheck, Truck, Headphones } from 'lucide-react';
+
+const CURRENT_YEAR = 2026;
 
 export const Footer = () => {
   return (
@@ -80,7 +82,7 @@ export const Footer = () => {
       {/* Bottom Bar */}
       <div className="container footer-bottom">
         <div>
-          © {new Date().getFullYear()} <strong>BeejBhandar</strong> — Online Seed Shopping System. Designed & Developed by <strong>Bhoomi Verma</strong>.
+          © {CURRENT_YEAR} <strong>BeejBhandar</strong> — Online Seed Shopping System. Designed & Developed by <strong>Bhoomi Verma</strong>.
         </div>
         <div style={{ display: 'flex', gap: '1.25rem' }}>
           <span>Frontend-Only React Application</span>

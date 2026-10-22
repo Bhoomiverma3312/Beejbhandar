@@ -65,26 +65,62 @@ export const OrdersProvider = ({ children }) => {
   }, [orders]);
 
   const placeOrder = (orderData) => {
-    const orderId = `BB-${Math.floor(10000 + Math.random() * 90000)}`;
+    // Generate a unique demo order ID with timestamp suffix for collision resistance
+    const randomDigits = Math.floor(1000 + Math.random() * 9000);
+    const orderId = `BB-${Date.now().toString().slice(-4)}${randomDigits}`;
+
+    // Deep snapshot of items so future product modifications or catalog deletions don't affect existing orders
+    const itemsSnapshot = (orderData.items || []).map((item) => ({
+      id: item.id,
+      name: String(item.name || ''),
+      shortName: String(item.shortName || item.name || ''),
+      selectedSize: String(item.selectedSize || 'Standard Pack'),
+      selectedPrice: Number(item.selectedPrice || item.price || 0),
+      quantity: Number(item.quantity || 1),
+      image: item.image || ''
+    }));
+
     const newOrder = {
       orderId,
       date: new Date().toISOString(),
-      status: "Confirmed",
-      paymentStatus: "Paid",
-      trackingNumber: `AGRI-IND-${Math.floor(10000000 + Math.random() * 90000000)}`,
-      ...orderData
+      status: orderData.status || "Placed",
+      paymentStatus: orderData.paymentMethod?.includes('Cash on Delivery') ? "Pending (Cash on Delivery)" : "Simulated / Paid",
+      trackingNumber: `AGRI-DEMO-${Math.floor(10000000 + Math.random() * 90000000)}`,
+      isDemo: true,
+      demoNotice: "Simulation only. No real payment charged or physical shipment booked.",
+      ...orderData,
+      items: itemsSnapshot
     };
 
     setOrders((prev) => [newOrder, ...prev]);
     return newOrder;
   };
 
-  const getOrderById = (id) => {
-    return orders.find((o) => o.orderId === id || o.orderId === `BB-${id}`);
+  const updateOrderStatus = (orderId, newStatus) => {
+    setOrders((prev) =>
+      prev.map((order) => {
+        if (order.orderId === orderId) {
+          return {
+            ...order,
+            status: newStatus,
+            lastUpdated: new Date().toISOString()
+          };
+        }
+        return order;
+      })
+    );
+  };
+
+  const deleteOrder = (orderId) => {
+    setOrders((prev) => prev.filter((o) => o.orderId !== orderId));
+  };
+
+  const getOrderById = (orderId) => {
+    return orders.find((o) => o.orderId === orderId) || null;
   };
 
   return (
-    <OrdersContext.Provider value={{ orders, placeOrder, getOrderById }}>
+    <OrdersContext.Provider value={{ orders, placeOrder, getOrderById, updateOrderStatus, deleteOrder }}>
       {children}
     </OrdersContext.Provider>
   );

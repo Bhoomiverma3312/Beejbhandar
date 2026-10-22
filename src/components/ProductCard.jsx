@@ -14,8 +14,10 @@ export const ProductCard = ({ product }) => {
 
   const isOutOfStock = !product.inStock || product.stock <= 0;
   const isFavorited = isInWishlist(product.id);
-  const defaultSize = product.packageSizes?.[0] || { size: 'Standard Pack', price: product.price };
+  const sizes = product.packageSizes || product.packSizes || [];
+  const defaultSize = sizes[0] || { size: 'Standard Pack', price: product.price };
   const productUrl = `/product/${product.id}`;
+  const imgSrc = product.image || product.images?.[0]?.url || 'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?auto=format&fit=crop&w=700&q=80';
 
   const handleAddToCart = (e) => {
     e.preventDefault();
@@ -35,7 +37,7 @@ export const ProductCard = ({ product }) => {
       <div className="card-image-wrap">
         <Link to={productUrl} className="card-image-link" aria-label={product.name}>
           <img
-            src={product.image}
+            src={imgSrc}
             alt={product.name}
             loading="lazy"
             onError={handleImageError}
@@ -55,9 +57,9 @@ export const ProductCard = ({ product }) => {
                   {product.badge}
                 </span>
               )}
-              {product.discountPercent > 0 && (
+              {(product.discountPercent > 0 || product.discount > 0) && (
                 <span className="badge badge-danger">
-                  -{product.discountPercent}% OFF
+                  -{product.discountPercent || product.discount}% OFF
                 </span>
               )}
             </>

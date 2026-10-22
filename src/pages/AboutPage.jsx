@@ -2,14 +2,9 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import {
   Sprout,
-  ShieldCheck,
   CheckCircle2,
   Code2,
-  Cpu,
-  Layers,
-  ArrowRight,
-  Sparkles,
-  Award
+  ArrowRight
 } from 'lucide-react';
 import { Button } from '../components/Button';
 
