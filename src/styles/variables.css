@@ -1,0 +1,105 @@
+:root {
+  /* Brand Color Palette */
+  --bg-primary: #F8F7F0;          /* Warm ivory background */
+  --bg-surface: #FFFFFF;          /* Pure white card & sheet surface */
+  --bg-surface-alt: #F1EFE6;      /* Slightly deeper ivory for contrast */
+  --bg-sage: #DDE8D7;             /* Muted sage accent */
+  --bg-sage-light: #EEF4EB;       /* Very soft sage tint */
+  
+  --color-primary: #24563C;       /* Forest green */
+  --color-primary-dark: #173D2B;  /* Deep green */
+  --color-primary-light: #327552; /* Lighter emerald/forest */
+  --color-primary-hover: #1E4933; /* Darker hover */
+  
+  --color-accent: #C68A36;        /* Warm harvest amber/ochre */
+  --color-accent-hover: #AF7629;  /* Darker amber */
+  --color-accent-light: #FBF4E8;  /* Light amber wash */
+  
+  --color-earth: #8C5B3E;         /* Warm clay/earth */
+  --color-terracotta: #B45309;
+  
+  /* Text Colors */
+  --text-primary: #19271E;        /* Deep charcoal with subtle green tint */
+  --text-secondary: #56685D;      /* Readable earthy gray-green */
+  --text-muted: #84968C;          /* Light subtle text */
+  --text-inverse: #FFFFFF;        /* On dark backgrounds */
+  --text-brand: #24563C;          /* Forest green text */
+
+  /* Borders & Dividers */
+  --border-subtle: #E6E8DE;       /* Muted organic hairline border */
+  --border-strong: #CBD2C1;       /* Medium divider border */
+  --border-focus: #24563C;        /* Interactive focus border */
+
+  /* Semantic Feedback Colors */
+  --status-success: #226D3F;
+  --status-success-bg: #E8F5ED;
+  --status-warning: #B45309;
+  --status-warning-bg: #FEF3C7;
+  --status-danger: #BE2828;
+  --status-danger-bg: #FEE2E2;
+  --status-info: #1D5E79;
+  --status-info-bg: #E0F2FE;
+
+  /* Typography */
+  --font-heading: 'Playfair Display', Georgia, serif;
+  --font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  
+  --font-size-xs: 0.75rem;     /* 12px */
+  --font-size-sm: 0.84375rem;  /* 13.5px */
+  --font-size-base: 0.9375rem; /* 15px */
+  --font-size-md: 1.0625rem;   /* 17px */
+  --font-size-lg: 1.1875rem;   /* 19px */
+  --font-size-xl: 1.375rem;    /* 22px */
+  --font-size-2xl: 1.75rem;    /* 28px */
+  --font-size-3xl: 2.25rem;    /* 36px */
+  --font-size-4xl: 2.875rem;   /* 46px */
+
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* Spacing Scale */
+  --space-2xs: 0.25rem;  /* 4px */
+  --space-xs: 0.5rem;    /* 8px */
+  --space-sm: 0.75rem;   /* 12px */
+  --space-md: 1rem;      /* 16px */
+  --space-lg: 1.5rem;    /* 24px */
+  --space-xl: 2rem;      /* 32px */
+  --space-2xl: 3rem;     /* 48px */
+  --space-3xl: 4.5rem;   /* 72px */
+  --space-4xl: 6rem;     /* 96px */
+
+  /* Realistic Box Shadows (Subtle, professional) */
+  --shadow-xs: 0 1px 2px rgba(23, 61, 43, 0.04);
+  --shadow-sm: 0 2px 4px rgba(23, 61, 43, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
+  --shadow-md: 0 4px 12px rgba(23, 61, 43, 0.06), 0 2px 4px rgba(0, 0, 0, 0.02);
+  --shadow-lg: 0 12px 28px rgba(23, 61, 43, 0.08), 0 4px 8px rgba(0, 0, 0, 0.03);
+  --shadow-xl: 0 20px 40px rgba(23, 61, 43, 0.11), 0 6px 12px rgba(0, 0, 0, 0.04);
+  --shadow-inner: inset 0 2px 4px rgba(23, 61, 43, 0.04);
+
+  /* Border Radii (Earthy, refined, not oversized) */
+  --radius-xs: 3px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
+  --radius-pill: 9999px;
+
+  /* Transitions */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 240ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-smooth: 350ms cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Layout Containers */
+  --container-max-width: 1240px;
+  --container-compact: 980px;
+  --container-narrow: 760px;
+  
+  /* Z-Index Hierarchy */
+  --z-base: 1;
+  --z-sticky: 100;
+  --z-dropdown: 200;
+  --z-modal: 500;
+  --z-toast: 1000;
+}
