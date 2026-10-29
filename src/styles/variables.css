@@ -91,10 +91,10 @@
   --transition-normal: 240ms cubic-bezier(0.4, 0, 0.2, 1);
   --transition-smooth: 350ms cubic-bezier(0.16, 1, 0.3, 1);
 
-  /* Layout Containers */
-  --container-max-width: 1240px;
-  --container-compact: 980px;
-  --container-narrow: 760px;
+  /* Layout Containers (Full screen / Widescreen optimized) */
+  --container-max-width: 1600px;
+  --container-compact: 1200px;
+  --container-narrow: 880px;
   
   /* Z-Index Hierarchy */
   --z-base: 1;

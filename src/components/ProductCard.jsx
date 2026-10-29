@@ -5,6 +5,7 @@ import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
 import { formatPrice } from '../utils/formatters';
 import { handleImageError } from '../utils/imageFallback';
+import { ProductImage } from './ProductImage';
 
 export const ProductCard = ({ product }) => {
   const { addToCart } = useCart();
@@ -36,11 +37,11 @@ export const ProductCard = ({ product }) => {
     <article className={`product-card ${isOutOfStock ? 'card-out-of-stock' : ''}`} id={`product-${product.id}`}>
       <div className="card-image-wrap">
         <Link to={productUrl} className="card-image-link" aria-label={product.name}>
-          <img
+          <ProductImage
             src={imgSrc}
             alt={product.name}
+            fallbackSrc="/images/seed-placeholder.svg"
             loading="lazy"
-            onError={handleImageError}
           />
         </Link>
 

@@ -5,6 +5,7 @@ import { formatPrice, formatDate } from '../utils/formatters';
 import { EmptyState } from '../components/EmptyState';
 import { Button } from '../components/Button';
 import { handleImageError } from '../utils/imageFallback';
+import { ProductImage } from '../components/ProductImage';
 import {
   Package,
   Truck,
@@ -184,14 +185,13 @@ export const MyOrdersPage = () => {
                         key={idx}
                         style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.65rem', background: 'var(--bg-surface-alt)', borderRadius: 'var(--radius-sm)' }}
                       >
-                        {item.image && (
-                          <img
+                        <div style={{ width: '44px', height: '44px', borderRadius: '4px', overflow: 'hidden', flexShrink: 0 }}>
+                          <ProductImage
                             src={item.image}
                             alt={item.name}
-                            onError={handleImageError}
-                            style={{ width: '44px', height: '44px', objectFit: 'cover', borderRadius: '4px', flexShrink: 0 }}
+                            fallbackSrc="/images/seed-placeholder.svg"
                           />
-                        )}
+                        </div>
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <strong style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                             {item.shortName || item.name}

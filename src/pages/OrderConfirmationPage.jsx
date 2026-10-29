@@ -4,6 +4,7 @@ import { useOrders } from '../context/OrdersContext';
 import { formatPrice, formatDate } from '../utils/formatters';
 import { Button } from '../components/Button';
 import { handleImageError } from '../utils/imageFallback';
+import { ProductImage } from '../components/ProductImage';
 import {
   CheckCircle2,
   Package,
@@ -193,14 +194,13 @@ export const OrderConfirmationPage = () => {
                 style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.85rem', background: 'var(--bg-surface-alt)', borderRadius: 'var(--radius-sm)' }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
-                  {item.image && (
-                    <img
+                  <div style={{ width: '48px', height: '48px', borderRadius: '4px', overflow: 'hidden', flexShrink: 0 }}>
+                    <ProductImage
                       src={item.image}
                       alt={item.name}
-                      onError={handleImageError}
-                      style={{ width: '48px', height: '48px', objectFit: 'cover', borderRadius: '4px' }}
+                      fallbackSrc="/images/seed-placeholder.svg"
                     />
-                  )}
+                  </div>
                   <div>
                     <strong style={{ display: 'block', fontSize: '0.9rem', color: 'var(--text-primary)' }}>
                       {item.shortName || item.name}
@@ -228,6 +228,12 @@ export const OrderConfirmationPage = () => {
               <span style={{ color: 'var(--text-secondary)' }}>Items Subtotal</span>
               <strong>{formatPrice(order.subtotal)}</strong>
             </div>
+            {order.discountAmount > 0 && (
+              <div className="summary-row" style={{ color: 'var(--status-success)' }}>
+                <span>Discount Coupon ({order.appliedCoupon || 'PROMO'})</span>
+                <strong>-{formatPrice(order.discountAmount)}</strong>
+              </div>
+            )}
             <div className="summary-row">
               <span style={{ color: 'var(--text-secondary)' }}>Delivery & Packing Charge</span>
               <span>{order.shippingFee === 0 ? <strong style={{ color: 'var(--status-success)' }}>FREE</strong> : formatPrice(order.shippingFee)}</span>

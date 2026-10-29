@@ -12,11 +12,18 @@ import {
   ChevronDown,
   LayoutDashboard,
   Package,
-  Check
+  Check,
+  Layers,
+  LogOut,
+  LogIn,
+  ExternalLink,
+  Languages
 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
 import { useToast } from '../context/ToastContext';
+import { useAuth, ROLE_ROUTES, ROLE_LABELS } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 import { categories } from '../data/categoriesData';
 
 export const Navbar = () => {
@@ -27,12 +34,11 @@ export const Navbar = () => {
   const [profileOpen, setProfileOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
 
-  // Demo profile state
-  const [activeProfile, setActiveProfile] = useState('Bhoomi Verma (Farmer)');
-
-  const { cartCount } = useCart();
+  const { user, login, logout } = useAuth();
+  const { cartCount, openCartDrawer } = useCart();
   const { wishlistCount } = useWishlist();
   const { showToast } = useToast();
+  const { lang, toggleLanguage, t, isHindi } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -101,11 +107,23 @@ export const Navbar = () => {
     setMobileMenuOpen(false);
   };
 
-  const handleSwitchProfile = (name) => {
-    setActiveProfile(name);
+  const handleSwitchPersona = async (email, roleLabel) => {
+    const res = await login(email, 'demo123');
     setProfileOpen(false);
-    showToast(`Switched active demo persona to: ${name}`, 'info');
+    if (res.success) {
+      showToast(`Switched active account to: ${res.user.name} (${roleLabel})`, 'success');
+      navigate(ROLE_ROUTES[res.user.role]);
+    }
   };
+
+  const handleLogout = () => {
+    logout();
+    setProfileOpen(false);
+    showToast('Signed out of demo session.', 'info');
+    navigate('/');
+  };
+
+  const userDashboardUrl = user ? (ROLE_ROUTES[user.role] || '/farmer/dashboard') : '/login';
 
   return (
     <>
@@ -121,7 +139,7 @@ export const Navbar = () => {
           <div className="announcement-right hide-mobile">
             <span className="announcement-badge">
               <ShieldCheck size={13} style={{ display: 'inline', marginRight: 4, verticalAlign: 'middle' }} />
-              100% Certified Germination Guaranteed
+              Certified Foundation Lots
             </span>
           </div>
         </div>
@@ -144,10 +162,15 @@ export const Navbar = () => {
           {/* Desktop Navigation Links */}
           <nav className="nav-links" aria-label="Main Navigation">
             <NavLink to="/" end className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
-              Home
+              {t('home', 'Home')}
             </NavLink>
             <NavLink to="/shop" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
-              Shop Seeds
+              {t('shop', 'Shop Seeds')}
+            </NavLink>
+
+            {/* 85 Categories Link */}
+            <NavLink to="/categories" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
+              {t('categories', 'Categories')}
             </NavLink>
 
             {/* Categories Dropdown */}
@@ -158,7 +181,7 @@ export const Navbar = () => {
                 onClick={() => setCategoriesOpen(!categoriesOpen)}
                 aria-expanded={categoriesOpen}
               >
-                <span>Categories</span>
+                <span>Quick Groups</span>
                 <ChevronDown size={14} className={`dropdown-chevron ${categoriesOpen ? 'rotated' : ''}`} />
               </button>
 
@@ -183,8 +206,8 @@ export const Navbar = () => {
                     ))}
                   </div>
                   <div className="dropdown-footer">
-                    <Link to="/shop" className="dropdown-footer-link" onClick={() => setCategoriesOpen(false)}>
-                      View All 7 Seed Categories →
+                    <Link to="/categories" className="dropdown-footer-link" onClick={() => setCategoriesOpen(false)}>
+                      View All 85 Subcategories Directory →
                     </Link>
                   </div>
                 </div>
@@ -196,6 +219,17 @@ export const Navbar = () => {
               Growing Guide
             </a>
 
+            {/* Role Dashboards Quick Direct Link */}
+            {user && (
+              <NavLink
+                to={userDashboardUrl}
+                className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
+                style={{ color: '#24563C', fontWeight: 600 }}
+              >
+                My {ROLE_LABELS[user.role]} Hub
+              </NavLink>
+            )}
+
             {/* About Link */}
             <NavLink to="/about" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
               About
@@ -204,6 +238,22 @@ export const Navbar = () => {
 
           {/* Header Action Buttons */}
           <div className="nav-actions">
+            {/* Language Switcher */}
+            <button
+              type="button"
+              className="action-btn"
+              onClick={() => {
+                toggleLanguage();
+                showToast(isHindi ? 'Switched to English' : 'हिंदी भाषा सक्षम की गई');
+              }}
+              aria-label="Toggle Language / भाषा बदलें"
+              title={isHindi ? 'Switch to English' : 'हिंदी में बदलें'}
+              style={{ fontWeight: 700, fontSize: '0.8rem', padding: '0 6px', width: 'auto', minWidth: '38px', color: '#24563C' }}
+            >
+              <Languages size={15} style={{ marginRight: '3px' }} />
+              <span>{isHindi ? 'EN' : 'हिन्दी'}</span>
+            </button>
+
             {/* Search Trigger */}
             <button
               type="button"
@@ -226,83 +276,148 @@ export const Navbar = () => {
               {wishlistCount > 0 && <span className="action-badge">{wishlistCount}</span>}
             </Link>
 
-            {/* Cart Link */}
-            <Link
-              to="/cart"
+            {/* Cart Drawer Trigger */}
+            <button
+              type="button"
               className="action-btn cart-btn-highlight"
-              aria-label={`Cart with ${cartCount} items`}
-              title="Shopping Cart"
+              onClick={openCartDrawer}
+              aria-label={`Open shopping cart with ${cartCount} items`}
+              title="Shopping Cart Drawer"
+              style={{ cursor: 'pointer' }}
             >
               <ShoppingBag size={18} />
               {cartCount > 0 && <span className="action-badge">{cartCount}</span>}
-            </Link>
+            </button>
 
-            {/* Profile Dropdown Menu for Demo Account Options */}
+            {/* Profile Dropdown Menu with Auth & Roles */}
             <div className="nav-dropdown-wrap" ref={profileRef}>
               <button
                 type="button"
                 className={`action-btn profile-action-btn ${profileOpen ? 'active' : ''}`}
                 onClick={() => setProfileOpen(!profileOpen)}
-                aria-label="Demo Account Menu"
-                title="Demo Account Options"
+                aria-label="Account Menu"
+                title={user ? `${user.name} (${user.role})` : "Sign In to Account"}
               >
                 <User size={18} />
               </button>
 
               {profileOpen && (
                 <div className="nav-dropdown-menu profile-dropdown">
-                  <div className="profile-dropdown-header">
-                    <div className="profile-avatar">
-                      {activeProfile.charAt(0)}
-                    </div>
-                    <div>
-                      <strong className="profile-user-name">{activeProfile}</strong>
-                      <span className="profile-user-role">Demo Seed Buyer</span>
-                    </div>
-                  </div>
+                  {user ? (
+                    <>
+                      <div className="profile-dropdown-header">
+                        <div className="profile-avatar">
+                          {user.name.charAt(0).toUpperCase()}
+                        </div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <strong className="profile-user-name" style={{ display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {user.name}
+                          </strong>
+                          <span className="profile-user-role" style={{ color: '#24563C', fontWeight: 600 }}>
+                            {ROLE_LABELS[user.role] || user.role} Portal
+                          </span>
+                        </div>
+                      </div>
 
-                  <div className="profile-dropdown-list">
-                    <Link to="/orders" className="profile-menu-item" onClick={() => setProfileOpen(false)}>
-                      <Package size={15} />
-                      <span>My Seed Orders & Tracking</span>
-                    </Link>
-                    <Link to="/wishlist" className="profile-menu-item" onClick={() => setProfileOpen(false)}>
-                      <Heart size={15} />
-                      <span>My Saved Varieties ({wishlistCount})</span>
-                    </Link>
-                    <Link to="/admin" className="profile-menu-item" onClick={() => setProfileOpen(false)}>
-                      <LayoutDashboard size={15} />
-                      <span>Store Admin Inventory Portal</span>
-                    </Link>
-                  </div>
+                      <div className="profile-dropdown-list">
+                        <Link
+                          to={userDashboardUrl}
+                          className="profile-menu-item"
+                          onClick={() => setProfileOpen(false)}
+                          style={{ background: '#EEF4EB', color: '#24563C', fontWeight: 700 }}
+                        >
+                          <LayoutDashboard size={15} />
+                          <span>Open {ROLE_LABELS[user.role]} Dashboard</span>
+                        </Link>
+                        <Link to="/orders" className="profile-menu-item" onClick={() => setProfileOpen(false)}>
+                          <Package size={15} />
+                          <span>My Seed Orders & Tracking</span>
+                        </Link>
+                        <Link to="/wishlist" className="profile-menu-item" onClick={() => setProfileOpen(false)}>
+                          <Heart size={15} />
+                          <span>My Saved Varieties ({wishlistCount})</span>
+                        </Link>
+                        <Link to="/admin" className="profile-menu-item" onClick={() => setProfileOpen(false)}>
+                          <LayoutDashboard size={15} />
+                          <span>Store Admin Inventory Portal</span>
+                        </Link>
+                      </div>
 
-                  <div className="profile-dropdown-section">
-                    <span className="profile-section-label">Switch Demo Persona:</span>
-                    <button
-                      type="button"
-                      className={`profile-switch-btn ${activeProfile.includes('Bhoomi') ? 'selected' : ''}`}
-                      onClick={() => handleSwitchProfile('Bhoomi Verma (Commercial Farmer)')}
-                    >
-                      <span>Bhoomi Verma (Farmer)</span>
-                      {activeProfile.includes('Bhoomi') && <Check size={13} />}
-                    </button>
-                    <button
-                      type="button"
-                      className={`profile-switch-btn ${activeProfile.includes('Kisan') ? 'selected' : ''}`}
-                      onClick={() => handleSwitchProfile('Kisan Organic Co-op (Grower)')}
-                    >
-                      <span>Kisan Organic Co-op</span>
-                      {activeProfile.includes('Kisan') && <Check size={13} />}
-                    </button>
-                    <button
-                      type="button"
-                      className={`profile-switch-btn ${activeProfile.includes('Terrace') ? 'selected' : ''}`}
-                      onClick={() => handleSwitchProfile('Sunita (Terrace Gardener)')}
-                    >
-                      <span>Sunita (Terrace Gardener)</span>
-                      {activeProfile.includes('Terrace') && <Check size={13} />}
-                    </button>
-                  </div>
+                      <div className="profile-dropdown-section">
+                        <span className="profile-section-label">Switch Role Persona:</span>
+                        <button
+                          type="button"
+                          className={`profile-switch-btn ${user.role === 'farmer' ? 'selected' : ''}`}
+                          onClick={() => handleSwitchPersona('farmer@demo.com', 'Farmer')}
+                        >
+                          <span>🚜 Ramesh Kumar (Farmer)</span>
+                          {user.role === 'farmer' && <Check size={13} />}
+                        </button>
+                        <button
+                          type="button"
+                          className={`profile-switch-btn ${user.role === 'coop' ? 'selected' : ''}`}
+                          onClick={() => handleSwitchPersona('coop@demo.com', 'Cooperative')}
+                        >
+                          <span>🏢 Punjab Agri Co-op (Cooperative)</span>
+                          {user.role === 'coop' && <Check size={13} />}
+                        </button>
+                        <button
+                          type="button"
+                          className={`profile-switch-btn ${user.role === 'gardener' ? 'selected' : ''}`}
+                          onClick={() => handleSwitchPersona('gardener@demo.com', 'Gardener')}
+                        >
+                          <span>🪴 Priya Sharma (Gardener)</span>
+                          {user.role === 'gardener' && <Check size={13} />}
+                        </button>
+                      </div>
+
+                      <div style={{ padding: '0.6rem 0.8rem', borderTop: '1px solid var(--border-subtle)' }}>
+                        <button
+                          type="button"
+                          onClick={handleLogout}
+                          style={{
+                            width: '100%',
+                            background: '#FEE2E2',
+                            color: '#991B1B',
+                            border: '1px solid #FCA5A5',
+                            borderRadius: '6px',
+                            padding: '0.45rem',
+                            fontSize: '0.78rem',
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '5px'
+                          }}
+                        >
+                          <LogOut size={14} />
+                          <span>Sign Out Session</span>
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    <div style={{ padding: '1.25rem 1rem', textAlign: 'center' }}>
+                      <p style={{ margin: '0 0 1rem', fontSize: '0.85rem', color: '#56685D' }}>
+                        Sign in to access Farmer, Co-op, or Gardener dashboards
+                      </p>
+                      <Link
+                        to="/login"
+                        className="btn btn-primary btn-sm"
+                        style={{ display: 'block', width: '100%', marginBottom: '0.5rem', textDecoration: 'none' }}
+                        onClick={() => setProfileOpen(false)}
+                      >
+                        Sign In
+                      </Link>
+                      <Link
+                        to="/register"
+                        style={{ fontSize: '0.78rem', color: '#24563C', fontWeight: 600, textDecoration: 'underline' }}
+                        onClick={() => setProfileOpen(false)}
+                      >
+                        Create New Account
+                      </Link>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -338,7 +453,7 @@ export const Navbar = () => {
                 </button>
                 <button
                   type="button"
-                  className="search-close-btn"
+                  className="search-expand-close"
                   onClick={() => setSearchOpen(false)}
                   aria-label="Close search"
                 >
@@ -371,11 +486,30 @@ export const Navbar = () => {
             <NavLink to="/shop" className="nav-link" onClick={() => setMobileMenuOpen(false)}>
               Shop Seeds
             </NavLink>
+            <NavLink to="/categories" className="nav-link" onClick={() => setMobileMenuOpen(false)}>
+              85 Seed Categories
+            </NavLink>
+
+            {user ? (
+              <NavLink
+                to={userDashboardUrl}
+                className="nav-link"
+                style={{ color: '#24563C', fontWeight: 700 }}
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                My {ROLE_LABELS[user.role]} Dashboard
+              </NavLink>
+            ) : (
+              <NavLink to="/login" className="nav-link" onClick={() => setMobileMenuOpen(false)}>
+                Sign In / Register
+              </NavLink>
+            )}
+
             <a href="#growing-guide" onClick={handleGrowingGuideClick} className="nav-link">
               Growing Guide
             </a>
             <NavLink to="/about" className="nav-link" onClick={() => setMobileMenuOpen(false)}>
-              About Project (Bhoomi Verma)
+              About Project
             </NavLink>
             <NavLink to="/orders" className="nav-link" onClick={() => setMobileMenuOpen(false)}>
               My Orders & Tracking
@@ -383,9 +517,30 @@ export const Navbar = () => {
             <NavLink to="/wishlist" className="nav-link" onClick={() => setMobileMenuOpen(false)}>
               Wishlist ({wishlistCount})
             </NavLink>
-            <NavLink to="/cart" className="nav-link" onClick={() => setMobileMenuOpen(false)}>
-              Shopping Cart ({cartCount})
-            </NavLink>
+            <button
+              type="button"
+              className="nav-link"
+              onClick={() => {
+                setMobileMenuOpen(false);
+                openCartDrawer();
+              }}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                width: '100%',
+                textAlign: 'left',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '0.65rem 0',
+                cursor: 'pointer',
+                font: 'inherit',
+                color: 'inherit'
+              }}
+            >
+              <span>Shopping Cart</span>
+              <span className="badge badge-primary">{cartCount}</span>
+            </button>
             <NavLink to="/admin" className="nav-link" onClick={() => setMobileMenuOpen(false)}>
               Admin Inventory Dashboard
             </NavLink>

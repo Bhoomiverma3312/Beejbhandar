@@ -7,6 +7,7 @@ import { formatPrice } from '../utils/formatters';
 import { EmptyState } from '../components/EmptyState';
 import { Button } from '../components/Button';
 import { handleImageError } from '../utils/imageFallback';
+import { ProductImage } from '../components/ProductImage';
 import {
   Heart,
   ShoppingBag,
@@ -98,7 +99,7 @@ export const WishlistPage = () => {
                 >
                   {/* Image */}
                   <Link to={`/product/${product.slug || product.id}`} className="wishlist-item-image">
-                    <img src={product.image} alt={product.name} onError={handleImageError} />
+                    <ProductImage src={product.image} alt={product.name} fallbackSrc="/images/seed-placeholder.svg" />
                     {isOutOfStock && (
                       <div className="wishlist-sold-out-badge">
                         <Ban size={14} />

@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { initialProducts, categories } from '../data/seedsData';
+import { seedCategories } from '../data/seedCategories';
 import { ProductCard } from '../components/ProductCard';
 import { SearchBar } from '../components/SearchBar';
 import { EmptyState } from '../components/EmptyState';
@@ -131,6 +132,16 @@ export const ShopPage = () => {
     setTimeout(() => setIsFiltering(false), 120);
   };
 
+  // Helper to resolve active category object (from primary categories or 85 subcategories)
+  const activeCategoryObj = useMemo(() => {
+    if (!selectedCategory || selectedCategory === 'all') return null;
+    const catMatch = categories.find((c) => c.id === selectedCategory || c.slug === selectedCategory);
+    if (catMatch) return catMatch;
+    const subMatch = seedCategories.find((sc) => sc.id === selectedCategory || sc.slug === selectedCategory);
+    if (subMatch) return subMatch;
+    return null;
+  }, [selectedCategory]);
+
   // Dynamic count of products per category
   const categoryCounts = useMemo(() => {
     const counts = { all: initialProducts.length };
@@ -148,9 +159,53 @@ export const ShopPage = () => {
       if (collection === 'featured' && !product.isFeatured) return false;
       if (collection === 'bestseller' && !(product.isBestseller || product.isBestSeller)) return false;
 
-      // 1. Category Filter
-      if (selectedCategory !== 'all' && product.category !== selectedCategory) {
-        return false;
+      // 1. Category Filter (Matches broad category or specific subcategory slug/id)
+      if (selectedCategory !== 'all') {
+        const selLower = selectedCategory.toLowerCase().trim();
+        const prodCat = (product.category || '').toLowerCase();
+        const prodSub = (product.subCategory || '').toLowerCase();
+        const prodName = (product.name || '').toLowerCase();
+        const prodShort = (product.shortName || '').toLowerCase();
+        const prodHindi = (product.hindiName || '').toLowerCase();
+        const prodTags = (product.tags || []).map(t => t.toLowerCase());
+
+        // Check if selectedCategory directly equals product category
+        const directCatMatch = prodCat === selLower;
+
+        // Check subcategory match or seedCategories match
+        const matchedSubcat = seedCategories.find(
+          (sc) => sc.id.toLowerCase() === selLower || sc.slug.toLowerCase() === selLower
+        );
+
+        let subcatMatch = false;
+        if (matchedSubcat) {
+          const subName = matchedSubcat.name.toLowerCase();
+          const subSlug = matchedSubcat.slug.toLowerCase();
+          const subHindi = (matchedSubcat.hindiName || '').toLowerCase();
+
+          subcatMatch =
+            prodSub.includes(subName) ||
+            prodSub.includes(subSlug) ||
+            prodTags.some(t => t.includes(subName) || t.includes(subSlug) || subName.includes(t)) ||
+            prodName.includes(subName) ||
+            prodShort.includes(subName) ||
+            (subHindi && prodHindi.includes(subHindi));
+
+          // If no specific variety matched yet, fall back to parent category match if available
+          if (!subcatMatch && matchedSubcat.parentId) {
+            const parentKey = matchedSubcat.parentId === 'field-crop' ? 'grain' : matchedSubcat.parentId === 'herb' || matchedSubcat.parentId === 'specialty' ? 'vegetable' : matchedSubcat.parentId;
+            if (prodCat === parentKey || prodCat === matchedSubcat.parentId) {
+              subcatMatch = true;
+            }
+          }
+        } else {
+          // General match against subcategory string or tags
+          subcatMatch = prodSub.includes(selLower) || prodTags.some(t => t.includes(selLower)) || prodName.includes(selLower);
+        }
+
+        if (!directCatMatch && !subcatMatch) {
+          return false;
+        }
       }
 
       // 2. Season Filter
@@ -245,7 +300,7 @@ export const ShopPage = () => {
           <span className="section-subtitle">Certified Indian Seed Catalog</span>
           <h1 className="section-title">Shop All Seed Varieties</h1>
           <p className="section-desc">
-            Browse 30+ laboratory-tested seed varieties across all 7 essential Indian agricultural categories. High germination, authentic foundation lines, and door delivery.
+            Browse {initialProducts.length}+ laboratory-tested seed varieties across all 7 essential Indian agricultural categories. Authentic foundation lines, certified germination, and doorstep delivery.
           </p>
         </div>
 
@@ -299,7 +354,7 @@ export const ShopPage = () => {
 
             {selectedCategory !== 'all' && (
               <span className="filter-chip">
-                <span>Category: {categories.find((c) => c.id === selectedCategory)?.name || selectedCategory}</span>
+                <span>Category: {activeCategoryObj?.name || selectedCategory}</span>
                 <button
                   type="button"
                   onClick={() => handleCategorySelect('all')}
@@ -625,7 +680,7 @@ export const ShopPage = () => {
             ) : (
               <EmptyState
                 title="No seed varieties match your criteria"
-                description={`We couldn't find any seeds matching your active filter criteria (${searchQuery ? `"${searchQuery}", ` : ''}${selectedCategory !== 'all' ? `Category: ${selectedCategory}, ` : ''}Price: ${formatPrice(minPrice)}–${formatPrice(maxPrice)}${inStockOnly ? ', In Stock Only' : ''}).`}
+                description={`We couldn't find any seeds matching your active filter criteria (${searchQuery ? `"${searchQuery}", ` : ''}${selectedCategory !== 'all' ? `Category: ${activeCategoryObj?.name || selectedCategory}, ` : ''}Price: ${formatPrice(minPrice)}–${formatPrice(maxPrice)}${inStockOnly ? ', In Stock Only' : ''}).`}
                 actionText="Reset All Filters"
                 onActionClick={handleResetFilters}
               />

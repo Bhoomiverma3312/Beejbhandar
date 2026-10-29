@@ -3,9 +3,9 @@ import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useToast } from '../context/ToastContext';
 import { formatPrice } from '../utils/formatters';
-import { EmptyState } from '../components/EmptyState';
 import { Button } from '../components/Button';
-import { handleImageError } from '../utils/imageFallback';
+import { ProductImage } from '../components/ProductImage';
+import { initialProducts } from '../data/seedsData';
 import {
   ShoppingBag,
   Trash2,
@@ -17,73 +17,112 @@ import {
   AlertTriangle,
   Package,
   ChevronRight,
-  X
+  X,
+  Sparkles,
+  Check
 } from 'lucide-react';
 
-/* ---------- Supported Demo Coupons ---------- */
-const VALID_COUPONS = {
-  KISAN10: { type: 'percent', value: 10, label: 'Kisan 10% Discount' },
-  BHOOMI10: { type: 'percent', value: 10, label: 'Bhoomi 10% Discount' },
-  FIRSTSEED: { type: 'flat', value: 50, label: 'First Seed ₹50 Off' }
-};
-
 export const CartPage = () => {
-  const { cartItems, removeFromCart, updateQuantity, clearCart, cartSubtotal, shippingFee, cartTotal } = useCart();
+  const {
+    cartItems,
+    removeFromCart,
+    updateQuantity,
+    changeItemPackSize,
+    clearCart,
+    cartCount,
+    cartSubtotal,
+    shippingFee,
+    isFreeShipping,
+    freeShippingThreshold,
+    remainingForFreeShipping,
+    appliedCoupon,
+    discountAmount,
+    applyCoupon,
+    removeCoupon,
+    cartTotal,
+    totalSavings,
+    addToCart
+  } = useCart();
+
   const { showToast } = useToast();
+  const [couponInput, setCouponInput] = useState('');
 
-  const [couponCode, setCouponCode] = useState('');
-  const [discountAmount, setDiscountAmount] = useState(0);
-  const [appliedCoupon, setAppliedCoupon] = useState('');
-
-  const freeShippingThreshold = 499;
-  const remainingForFreeShipping = Math.max(0, freeShippingThreshold - cartSubtotal);
   const freeShippingProgress = Math.min(100, (cartSubtotal / freeShippingThreshold) * 100);
 
   const handleApplyCoupon = (e) => {
     e.preventDefault();
-    const code = couponCode.trim().toUpperCase();
-    if (!code) return;
-
-    const coupon = VALID_COUPONS[code];
-    if (coupon) {
-      const discount = coupon.type === 'percent'
-        ? Math.round(cartSubtotal * (coupon.value / 100))
-        : coupon.value;
-      setDiscountAmount(discount);
-      setAppliedCoupon(code);
-      showToast(`Coupon ${code} applied: ${formatPrice(discount)} discount!`, 'success');
-    } else {
-      showToast('Invalid coupon code. Try "KISAN10", "BHOOMI10" or "FIRSTSEED"', 'error');
+    if (couponInput.trim()) {
+      applyCoupon(couponInput.trim());
+      setCouponInput('');
     }
   };
 
-  const handleRemoveCoupon = () => {
-    setDiscountAmount(0);
-    setAppliedCoupon('');
-    setCouponCode('');
-    showToast('Coupon removed.', 'info');
+  const handleClearCart = () => {
+    clearCart(true);
   };
 
-  const finalTotal = Math.max(0, cartTotal - discountAmount);
-  const totalSavings = discountAmount + (shippingFee === 0 && cartSubtotal > 0 ? 60 : 0);
-  const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+  // Recommended seeds for empty cart or cross-sell
+  const recommendedSeeds = initialProducts.slice(0, 4);
 
   if (cartItems.length === 0) {
     return (
       <div className="container section-py">
-        {/* Breadcrumb even on empty */}
         <nav className="pdp-breadcrumb" aria-label="Breadcrumb" style={{ marginBottom: 'var(--space-lg)' }}>
           <Link to="/">Home</Link>
           <ChevronRight size={14} />
           <span className="pdp-breadcrumb-current">Shopping Cart</span>
         </nav>
-        <EmptyState
-          icon={ShoppingBag}
-          title="Your Seed Cart is Empty"
-          description="You don't have any seed packets in your cart yet. Discover high-yielding vegetables, field crops, and organic varieties ready for this sowing season."
-          actionText="Shop Certified Seeds"
-          actionLink="/shop"
-        />
+
+        <div style={{ textAlign: 'center', padding: '4rem 1rem', background: '#FFFFFF', borderRadius: '16px', border: '1px solid #E6E8DE', marginBottom: '3rem' }}>
+          <div style={{ width: '70px', height: '70px', borderRadius: '50%', background: '#EEF4EB', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.25rem', color: '#24563C' }}>
+            <ShoppingBag size={34} />
+          </div>
+          <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.8rem', color: '#173D2B', marginBottom: '0.5rem' }}>
+            Your Seed Cart is Empty
+          </h2>
+          <p style={{ fontSize: '0.95rem', color: '#56685D', maxWidth: '440px', margin: '0 auto 1.75rem', lineHeight: 1.5 }}>
+            You don't have any seed packets in your cart yet. Discover high-yielding vegetables, field crops, and flower varieties ready for sowing this season.
+          </p>
+          <Link to="/shop" style={{ textDecoration: 'none' }}>
+            <Button variant="primary" size="lg" icon={ArrowRight} iconPosition="right">
+              Shop Certified Seeds
+            </Button>
+          </Link>
+        </div>
+
+        {/* Empty Cart Recommendations */}
+        <div style={{ marginTop: '2rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
+            <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#173D2B', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <Sparkles size={18} color="#C68A36" />
+              <span>Recommended Seeds to Start Sowing</span>
+            </h3>
+            <Link to="/shop" style={{ fontSize: '0.82rem', fontWeight: 600, color: '#24563C' }}>
+              View All 150+ Seeds →
+            </Link>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.25rem' }}>
+            {recommendedSeeds.map((seed) => (
+              <div key={seed.id} style={{ background: '#FFFFFF', border: '1px solid #E6E8DE', borderRadius: '12px', padding: '1rem', display: 'flex', flexDirection: 'column' }}>
+                <div style={{ height: '140px', borderRadius: '8px', overflow: 'hidden', marginBottom: '0.75rem' }}>
+                  <ProductImage src={seed.image} alt={seed.name} fallbackSrc="/images/seed-placeholder.svg" />
+                </div>
+                <h4 style={{ fontSize: '0.92rem', fontWeight: 700, color: '#173D2B', margin: '0 0 0.35rem 0' }}>{seed.name}</h4>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginTop: 'auto', paddingTop: '0.5rem' }}>
+                  <strong style={{ fontSize: '1.1rem', color: '#24563C' }}>₹{seed.price}</strong>
+                  <button
+                    type="button"
+                    onClick={() => addToCart(seed)}
+                    style={{ background: '#24563C', color: '#FFFFFF', border: 'none', borderRadius: '6px', padding: '0.4rem 0.8rem', fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer' }}
+                  >
+                    + Add to Cart
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     );
   }
@@ -101,13 +140,13 @@ export const CartPage = () => {
         <div className="section-header" style={{ marginBottom: 'var(--space-xl)' }}>
           <span className="section-subtitle">Shopping Cart</span>
           <h1 className="section-title">
-            Review Seed Order ({totalItems} {totalItems === 1 ? 'item' : 'items'} • {cartItems.length} {cartItems.length === 1 ? 'variety' : 'varieties'})
+            Review Seed Order ({cartCount} {cartCount === 1 ? 'packet' : 'packets'} • {cartItems.length} {cartItems.length === 1 ? 'variety' : 'varieties'})
           </h1>
         </div>
 
         {/* Free Shipping Progress */}
         <div className="cart-shipping-banner">
-          {remainingForFreeShipping > 0 ? (
+          {remainingForFreeShipping > 0 && !isFreeShipping ? (
             <>
               <div className="cart-shipping-icon">
                 <Truck size={20} color="var(--color-primary)" />
@@ -143,11 +182,7 @@ export const CartPage = () => {
               </span>
               <button
                 type="button"
-                onClick={() => {
-                  clearCart();
-                  setDiscountAmount(0);
-                  setAppliedCoupon('');
-                }}
+                onClick={handleClearCart}
                 className="cart-clear-btn"
               >
                 <Trash2 size={13} />
@@ -156,19 +191,19 @@ export const CartPage = () => {
             </div>
 
             <div className="cart-items-container">
-              {cartItems.map((item) => {
+              {cartItems.map((item, idx) => {
                 const lineTotal = item.selectedPrice * item.quantity;
-                const isNearStockLimit = item.quantity >= item.stock - 2 && item.stock <= 15;
-                const isAtMax = item.quantity >= item.stock;
+                const isNearStockLimit = item.stock && item.quantity >= item.stock - 2 && item.stock <= 15;
+                const isAtMax = item.stock && item.quantity >= item.stock;
 
                 return (
                   <div
-                    key={`${item.id}-${item.selectedSize}`}
+                    key={`${item.id}-${item.selectedSize}-${idx}`}
                     className="cart-item-card surface-card"
                   >
                     {/* Thumbnail */}
                     <Link to={`/product/${item.slug || item.id}`} className="cart-item-image">
-                      <img src={item.image} alt={item.name} onError={handleImageError} />
+                      <ProductImage src={item.image} alt={item.name} fallbackSrc="/images/seed-placeholder.svg" />
                     </Link>
 
                     {/* Details */}
@@ -176,10 +211,33 @@ export const CartPage = () => {
                       <Link to={`/product/${item.slug || item.id}`} className="cart-item-name">
                         {item.shortName || item.name}
                       </Link>
-                      <div className="cart-item-pack-badge">
-                        <Package size={12} />
-                        <span>Pack: {item.selectedSize}</span>
-                      </div>
+
+                      {/* Dynamic Pack Size Selector */}
+                      {item.packSizes && item.packSizes.length > 1 ? (
+                        <div style={{ margin: '0.25rem 0' }}>
+                          <select
+                            value={item.selectedSize}
+                            onChange={(e) => {
+                              const found = item.packSizes.find(p => p.size === e.target.value);
+                              if (found) changeItemPackSize(item.id, item.selectedSize, found.size, found.price);
+                            }}
+                            className="form-input"
+                            style={{ padding: '0.2rem 0.5rem', fontSize: '0.78rem', height: 'auto', display: 'inline-block', width: 'auto' }}
+                          >
+                            {item.packSizes.map((p, pIdx) => (
+                              <option key={pIdx} value={p.size}>
+                                {p.size} — ₹{p.price}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      ) : (
+                        <div className="cart-item-pack-badge">
+                          <Package size={12} />
+                          <span>Pack: {item.selectedSize}</span>
+                        </div>
+                      )}
+
                       <div className="cart-item-meta">
                         {item.brand} • {item.germinationRate}
                       </div>
@@ -265,8 +323,8 @@ export const CartPage = () => {
                   <input
                     type="text"
                     placeholder="Coupon code (e.g. KISAN10)"
-                    value={couponCode}
-                    onChange={(e) => setCouponCode(e.target.value)}
+                    value={couponInput}
+                    onChange={(e) => setCouponInput(e.target.value)}
                     className="form-input"
                     style={{ textTransform: 'uppercase', fontSize: '0.85rem' }}
                   />
@@ -276,12 +334,12 @@ export const CartPage = () => {
                 </div>
                 <div className="cart-coupon-hints">
                   <span>Try: </span>
-                  {Object.keys(VALID_COUPONS).map((code) => (
+                  {['KISAN10', 'BHOOMI10', 'AGRI20', 'FREESHIP'].map((code) => (
                     <button
                       key={code}
                       type="button"
                       className="cart-coupon-hint-btn"
-                      onClick={() => setCouponCode(code)}
+                      onClick={() => applyCoupon(code)}
                     >
                       {code}
                     </button>
@@ -294,7 +352,7 @@ export const CartPage = () => {
                 <span>{appliedCoupon} applied <strong>(−{formatPrice(discountAmount)})</strong></span>
                 <button
                   type="button"
-                  onClick={handleRemoveCoupon}
+                  onClick={removeCoupon}
                   className="cart-remove-coupon"
                   title="Remove coupon"
                 >
@@ -305,12 +363,12 @@ export const CartPage = () => {
 
             {/* Line calculations */}
             <div className="summary-row">
-              <span>Items Subtotal ({totalItems} items)</span>
+              <span>Items Subtotal ({cartCount} items)</span>
               <strong>{formatPrice(cartSubtotal)}</strong>
             </div>
 
             <div className="summary-row">
-              <span>Estimated Shipping</span>
+              <span>Estimated Freight / Shipping</span>
               <span>
                 {shippingFee === 0 ? (
                   <strong style={{ color: 'var(--status-success)' }}>FREE</strong>
@@ -322,14 +380,14 @@ export const CartPage = () => {
 
             {discountAmount > 0 && (
               <div className="summary-row" style={{ color: 'var(--status-success)' }}>
-                <span>Discount Savings</span>
+                <span>Coupon Discount</span>
                 <strong>-{formatPrice(discountAmount)}</strong>
               </div>
             )}
 
             <div className="summary-total-row">
               <span>Total Payable</span>
-              <span>{formatPrice(finalTotal)}</span>
+              <span>{formatPrice(cartTotal)}</span>
             </div>
 
             {totalSavings > 0 && (
@@ -339,7 +397,7 @@ export const CartPage = () => {
             )}
 
             <p className="cart-tax-note">
-              Inclusive of all taxes & certification fees. Delivered in sealed hermetic barrier pouches.
+              Inclusive of all taxes & certification fees. Delivered in hermetically sealed moisture-barrier pouches.
             </p>
 
             <Link to="/checkout" style={{ display: 'block' }}>

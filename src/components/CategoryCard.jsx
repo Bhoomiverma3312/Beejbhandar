@@ -1,9 +1,17 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowUpRight } from 'lucide-react';
+import { initialProducts } from '../data/seedsData';
+import { handleCategoryError } from '../utils/imageFallback';
 
 export const CategoryCard = ({ category }) => {
   if (!category) return null;
+
+  // Compute live count from catalog
+  const actualCount = useMemo(() => {
+    const matching = initialProducts.filter(p => p.category === category.id || p.category === category.slug);
+    return matching.length;
+  }, [category.id, category.slug]);
 
   return (
     <Link
@@ -16,6 +24,7 @@ export const CategoryCard = ({ category }) => {
           src={category.image}
           alt={category.name}
           loading="lazy"
+          onError={handleCategoryError}
         />
         {category.badge && (
           <span className="cat-badge">{category.badge}</span>
@@ -31,7 +40,7 @@ export const CategoryCard = ({ category }) => {
           <span className="cat-hindi-name">{category.hindiName}</span>
         )}
         <p className="cat-desc">{category.description}</p>
-        <span className="cat-count-pill">{category.count}</span>
+        <span className="cat-count-pill">{actualCount > 0 ? `${actualCount} Varieties` : category.count}</span>
       </div>
     </Link>
   );

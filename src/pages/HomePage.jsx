@@ -25,6 +25,8 @@ import {
 import { ProductCard } from '../components/ProductCard';
 import { CategoryCard } from '../components/CategoryCard';
 import { Button } from '../components/Button';
+import { SeedFinder } from '../components/SeedFinder';
+import { SeedComparison } from '../components/SeedComparison';
 
 export const HomePage = () => {
   // Popular this season products
@@ -193,7 +195,13 @@ export const HomePage = () => {
         </div>
       </section>
 
-      {/* 5. Seasonal Collection Banner */}
+      {/* 5. Smart Seed Finder Wizard */}
+      <SeedFinder />
+
+      {/* 6. Seed Comparison Tool */}
+      <SeedComparison />
+
+      {/* 7. Seasonal Collection Banner */}
       <section className="section-py" aria-label="Seasonal Collection Banner">
         <div className="container">
           <div className="seasonal-banner-card">

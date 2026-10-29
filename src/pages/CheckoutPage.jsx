@@ -6,6 +6,7 @@ import { useToast } from '../context/ToastContext';
 import { formatPrice } from '../utils/formatters';
 import { Button } from '../components/Button';
 import { handleImageError } from '../utils/imageFallback';
+import { ProductImage } from '../components/ProductImage';
 import {
   Truck,
   Lock,
@@ -27,7 +28,7 @@ const INDIAN_STATES = [
 ];
 
 export const CheckoutPage = () => {
-  const { cartItems, cartSubtotal, shippingFee, cartTotal, clearCart } = useCart();
+  const { cartItems, cartSubtotal, shippingFee, cartTotal, clearCart, discountAmount, appliedCoupon } = useCart();
   const { placeOrder } = useOrders();
   const { showToast } = useToast();
   const navigate = useNavigate();
@@ -214,6 +215,8 @@ export const CheckoutPage = () => {
             : 'Online Payment (Demo)',
           subtotal: cartSubtotal,
           shippingFee: shippingFee,
+          discountAmount: discountAmount || 0,
+          appliedCoupon: appliedCoupon || null,
           total: cartTotal,
           status: 'Placed',
           estimatedDelivery: new Date(Date.now() + 4 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
@@ -555,14 +558,13 @@ export const CheckoutPage = () => {
               {cartItems.map((item) => (
                 <div key={`${item.id}-${item.selectedSize}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.82rem', paddingBottom: '0.5rem', borderBottom: '1px dashed var(--border-subtle)' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', minWidth: 0, flex: 1, paddingRight: '0.5rem' }}>
-                    {item.image && (
-                      <img
+                    <div style={{ width: '38px', height: '38px', borderRadius: '4px', overflow: 'hidden', flexShrink: 0 }}>
+                      <ProductImage
                         src={item.image}
                         alt={item.name}
-                        onError={handleImageError}
-                        style={{ width: '38px', height: '38px', objectFit: 'cover', borderRadius: '4px', flexShrink: 0 }}
+                        fallbackSrc="/images/seed-placeholder.svg"
                       />
-                    )}
+                    </div>
                     <div style={{ minWidth: 0, flex: 1 }}>
                       <strong style={{ color: 'var(--text-primary)', display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                         {item.shortName || item.name}
@@ -584,6 +586,13 @@ export const CheckoutPage = () => {
               <span style={{ color: 'var(--text-secondary)' }}>Subtotal</span>
               <strong>{formatPrice(cartSubtotal)}</strong>
             </div>
+
+            {discountAmount > 0 && (
+              <div className="summary-row" style={{ color: 'var(--status-success)' }}>
+                <span>Coupon ({appliedCoupon})</span>
+                <strong>-{formatPrice(discountAmount)}</strong>
+              </div>
+            )}
 
             <div className="summary-row">
               <span style={{ color: 'var(--text-secondary)' }}>Delivery Charge</span>

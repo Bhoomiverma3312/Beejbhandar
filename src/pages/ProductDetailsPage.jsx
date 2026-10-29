@@ -8,6 +8,9 @@ import { formatPrice } from '../utils/formatters';
 import { ProductCard } from '../components/ProductCard';
 import { Button } from '../components/Button';
 import { handleImageError } from '../utils/imageFallback';
+import { ProductImage } from '../components/ProductImage';
+import { SeedPassport } from '../components/SeedPassport';
+
 import {
   Heart,
   ShoppingBag,
@@ -185,9 +188,12 @@ export const ProductDetailsPage = () => {
     .filter((p) => p.category === product.category && p.id !== product.id)
     .slice(0, 4);
 
+  // import { SeedPassport } from '../components/SeedPassport';
+
   const TABS = [
     { key: 'description', label: 'Description' },
     { key: 'specs', label: 'Seed Specs' },
+    { key: 'passport', label: 'Seed Passport & Intake' },
     { key: 'sowing', label: 'Sowing Guide' },
     { key: 'tips', label: 'Growing Tips' },
     { key: 'reviews', label: `Reviews (${reviews.length})` }
@@ -232,7 +238,11 @@ export const ProductDetailsPage = () => {
           {/* Left Column: Image Gallery */}
           <div className="product-gallery-wrap">
             <div className="main-product-img">
-              <img src={galleryImages[activeGalleryIdx]?.src || product.image} alt={product.name} onError={handleImageError} />
+              <ProductImage
+                src={galleryImages[activeGalleryIdx]?.src || product.image}
+                alt={product.name}
+                fallbackSrc="/images/seed-placeholder.svg"
+              />
               {isOutOfStock && (
                 <div className="pdp-sold-out-overlay">
                   <span>SOLD OUT</span>
@@ -250,7 +260,7 @@ export const ProductDetailsPage = () => {
                   onClick={() => setActiveGalleryIdx(idx)}
                   aria-label={`View ${img.label}`}
                 >
-                  <img src={img.src} alt={img.label} onError={handleImageError} />
+                  <ProductImage src={img.src} alt={img.label} fallbackSrc="/images/seed-placeholder.svg" />
                 </button>
               ))}
             </div>
@@ -497,6 +507,13 @@ export const ProductDetailsPage = () => {
                     <tr><td>Stock Availability</td><td>{isOutOfStock ? 'Out of Stock' : `${product.stock} packets available`}</td></tr>
                   </tbody>
                 </table>
+              </div>
+            )}
+
+            {/* Seed Passport Tab */}
+            {activeTab === 'passport' && (
+              <div className="pdp-tab-panel" style={{ padding: 0 }}>
+                <SeedPassport product={product} />
               </div>
             )}
 

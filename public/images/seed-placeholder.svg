@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F1EFE6" />
+      <stop offset="50%" stop-color="#EEF4EB" />
+      <stop offset="100%" stop-color="#E2EADF" />
+    </linearGradient>
+    <linearGradient id="leafGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#327552" />
+      <stop offset="100%" stop-color="#173D2B" />
+    </linearGradient>
+    <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#E0A955" />
+      <stop offset="100%" stop-color="#C68A36" />
+    </linearGradient>
+    <filter id="softShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#173D2B" flood-opacity="0.12" />
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="400" height="300" fill="url(#bgGrad)" />
+  
+  <!-- Subtle agricultural soil line -->
+  <path d="M 0 250 Q 100 240, 200 250 T 400 245 L 400 300 L 0 300 Z" fill="#DDE8D7" opacity="0.6" />
+  <path d="M 0 265 Q 120 258, 240 265 T 400 260 L 400 300 L 0 300 Z" fill="#CBD2C1" opacity="0.4" />
+
+  <!-- Central Seed Pouch Graphic -->
+  <g transform="translate(140, 60)" filter="url(#softShadow)">
+    <!-- Seed Pouch Contour -->
+    <rect x="10" y="20" width="100" height="130" rx="14" fill="#FFFFFF" stroke="#CBD2C1" stroke-width="2" />
+    <!-- Top Foil Seal -->
+    <path d="M 10 32 L 110 32" stroke="#C68A36" stroke-width="4" stroke-linecap="round" />
+    <path d="M 10 26 L 110 26" stroke="#E6E8DE" stroke-width="1.5" stroke-dasharray="3,3" />
+
+    <!-- Seed Embryo / Sprout Badge -->
+    <circle cx="60" cy="75" r="26" fill="#EEF4EB" stroke="#24563C" stroke-width="1.5" />
+    
+    <!-- Sprout Icon -->
+    <path d="M 60 88 C 60 76, 50 66, 44 65 C 44 75, 52 85, 60 88 Z" fill="url(#leafGrad)" />
+    <path d="M 60 88 C 60 73, 72 63, 78 62 C 78 73, 68 85, 60 88 Z" fill="url(#accentGrad)" />
+    <circle cx="60" cy="88" r="2.5" fill="#173D2B" />
+
+    <!-- Brand Label Tag -->
+    <rect x="25" y="112" width="70" height="18" rx="4" fill="#24563C" />
+    <text x="60" y="124" fill="#FFFFFF" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="8.5" font-weight="700" text-anchor="middle" letter-spacing="0.5">BEEJ BHANDAR</text>
+  </g>
+
+  <!-- Title & Subtitle -->
+  <text x="200" y="224" fill="#173D2B" font-family="'Playfair Display', serif, Georgia" font-size="16" font-weight="700" text-anchor="middle">Certified Seed Variety</text>
+  <text x="200" y="242" fill="#56685D" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="11" font-weight="500" text-anchor="middle">100% Verified Germination Tested</text>
+</svg>

@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="100%" height="100%">
+  <defs>
+    <linearGradient id="catBgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#EEF4EB" />
+      <stop offset="100%" stop-color="#DDE8D7" />
+    </linearGradient>
+    <linearGradient id="catLeaf" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#327552" />
+      <stop offset="100%" stop-color="#24563C" />
+    </linearGradient>
+  </defs>
+  <rect width="400" height="300" fill="url(#catBgGrad)" />
+  <g transform="translate(150, 70)">
+    <circle cx="50" cy="50" r="48" fill="#FFFFFF" stroke="#CBD2C1" stroke-width="2" />
+    <!-- Sprout and grain ears -->
+    <path d="M 50 78 C 50 55, 30 42, 22 40 C 22 58, 38 72, 50 78 Z" fill="url(#catLeaf)" />
+    <path d="M 50 78 C 50 52, 70 38, 78 36 C 78 55, 62 72, 50 78 Z" fill="#C68A36" />
+    <path d="M 50 30 L 50 82" stroke="#173D2B" stroke-width="2" stroke-linecap="round" />
+  </g>
+  <text x="200" y="200" fill="#173D2B" font-family="'Playfair Display', serif" font-size="17" font-weight="700" text-anchor="middle">Seed Category</text>
+  <text x="200" y="222" fill="#56685D" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" font-weight="600" text-anchor="middle">BeejBhandar Agricultural Collection</text>
+</svg>

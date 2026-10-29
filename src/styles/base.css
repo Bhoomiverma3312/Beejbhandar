@@ -121,6 +121,13 @@ ul, ol {
   }
 }
 
+@media (min-width: 1440px) {
+  .container {
+    padding-left: clamp(2rem, 3.5vw, 4rem);
+    padding-right: clamp(2rem, 3.5vw, 4rem);
+  }
+}
+
 /* Page Layout Wrapper */
 .page-wrapper {
   flex: 1;
